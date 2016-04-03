@@ -13,11 +13,11 @@ class Sudoku{
 		void rotate(int n);
 		void flip(int n);
 		void transform();
-		void printOut(bool);
+		void printOut(bool,int a[81]);
 	private:
 
 		int q[81];
-		int map[81];
+//		int map[81];
 		int RowRecord[2];
 		int ColRecord[2];
 

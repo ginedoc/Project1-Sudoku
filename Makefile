@@ -8,4 +8,4 @@ main.o:	main.cpp Sudoku.h
 	g++ -c main.cpp
 
 clean:
-	rm main.o Sudoku.o
+	rm main.o Sudoku.o Sudoku_solve.o
