@@ -41,13 +41,13 @@ void Sudoku::solve(){
 
 	if(Ans == 0 || Ans == 2){
 		cout << "2" << endl;
-		cout << "Ans = " << Ans << endl;
+//		cout << "Ans = " << Ans << endl;
 //		printOut(true);
 		return;
 	}
 	else{
 		cout << "1" << endl;
-		cout << "Ans = " << Ans << endl;
+//		cout << "Ans = " << Ans << endl;
 		printOut(true);
 		return;
 	}
@@ -80,46 +80,55 @@ void Sudoku::TurnOffOrigin(bool lgt[81][9], int a[81]){
 	}
 
 }
+int A[81];
 void Sudoku::TraceBack(int n,bool l[81][9],int a[81]){
 	int i,j,k;
+	int cnt;
 	int tmp[81];
 	bool r[81][9];
 	
-	cout << "n = " << n << endl;
-	for(i=0;i<81;i++){
-		if(i%9==0) cout << endl;
-		cout << a[i] << " ";
-	}
-	cout << endl;
+//	cout << "n = " << n << endl;
+//	for(i=0;i<81;i++){
+//		if(i%9==0) cout << endl;
+//		cout << a[i] << " ";
+//	}
+//	cout << endl;
 
 
 	if( CheckMap(a)){
 		cout << "test1\n";
 		Ans++;
-/*		if( Ans == 1 ){
-			for(i=0;i<9;i++){
-				if(light[n-1][i]==true){
-					light[n-1][i] = false;
-					break;
-				}
-			}
-			for(i=0;i<81;i++){
-			for(j=0;j< 9;j++){
-				l[i][j] = light[i][j];
-			}
-			}
-
-			TraceBack(0,l,a);
-		}
-		if( Ans == 2 ) return;
-*/
 		for( i=0;i<81;i++ ) q[i] = a[i];
 		
-		for(i=0;i<81;i++){
-			if(i%9==0) cout << endl;
-			cout << a[i] << " ";
+	//	printOut(false);
+
+		if( Ans == 1 ){
+
+		
+			for(i=0;i<81;i++){
+				cnt = 0;
+				for(j=0;j<9;j++){
+					if(light[i][j] == true) cnt++;
+				}
+				if(cnt > 1){
+					for(j=0;j<9;j++){
+						if(light[i][j] == true ) light[i][j] = false;
+						break;
+					}
+					for(j=0;j<81;j++){
+						a[j] = 0;
+						for(k=0;j<9;k++){
+							l[j][k] = light[j][k];
+						}
+					}
+					Refill(l,a);
+					TraceBack(0,l,a);
+				}
+			}
 		}
-		return;
+		if( Ans == 2 ) return;
+
+		
 
 	}	
 	if( NoLight(l)){
@@ -155,11 +164,11 @@ void Sudoku::TraceBack(int n,bool l[81][9],int a[81]){
 				}
 	
 				TurnOffOrigin(l,a);
-//				CheckSmlMatrix(l,a);
-//				CheckRow(l,a);
-//				CheckCol(l,a);
-//				OnlyRemain(l,a);
-//				Refill(l,a);
+				CheckSmlMatrix(l,a);
+				CheckRow(l,a);
+				CheckCol(l,a);
+				OnlyRemain(l,a);
+				Refill(l,a);
 			
 				if(NoLight(l)){
 	
@@ -473,25 +482,13 @@ void Sudoku::OnlyRemain(bool lgt[81][9],int a[81]){
 
 bool Sudoku::CheckMap(int map[81]){
 	int i,j,k;
-	int l1[9],l2[9],l3[9];
-	int cnt = 0;
 
-	for( i=0;i<81;i++) {
-		if(map[i]==0) return false;
+	int num = 0;
+
+	for(i=0;i<81;i++){
+		[
 	}
-	for(i=0;i<9;i++){
-		l1[i] = 0;
-		l2[i] = 0;
-		l3[i] = 0;
-	}
-	for(k =1 ; k < 10;k++){
-		for(i=0;i<9;i++){
-			for(j=0;j<9;j++){
-				if(map[i*9+j]==k)	l1[k-1]++;
-				if(map[j*9+i]==k)	l2[k-1]++;
-			}
-		}
-	}
+	
 
 	int n = 0;
 	while( n<9 ){
