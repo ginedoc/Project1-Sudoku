@@ -30,9 +30,11 @@ class Sudoku{
 		void CheckCol(bool a[81][9],int q[81]);
 		void OnlyRemain(bool a[81][9],int q[81]);
 		void Refill(bool a[81][9],int q[81]);
-		void TraceBack(int n,bool l[81][9],int a[81]);
-//		void RemainTry();
+		void TraceBack(bool l[81][9],int a[81]);
+		int getValid(int);
+		int CheckSolution(bool l[81][9]);
+		bool ExsistZero();
 
-		bool CheckMap(int map[81]);
+		bool CheckMap();
 };
 

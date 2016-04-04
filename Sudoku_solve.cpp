@@ -16,14 +16,15 @@ void Initialize(bool lgt[81][9]);
 bool NoLight(bool lgt[81][9]);
 void printLight(bool lgt[81][9]);
 bool CheckRule(int*);
-bool TwoSolution(bool l[81][9]);
+bool MaybeMat(bool *l,int a);
+bool TwoLight(bool l[81][9]);
 
 void Sudoku::solve(){
 	
 	int i,j;
 	int record_map[81];
 	bool record_light[81][9];
-	Ans = 0;
+	
 	//solving skill
 	Initialize(light);
 	TurnOffOrigin(light,Sudoku::q);
@@ -33,27 +34,60 @@ void Sudoku::solve(){
 	OnlyRemain(light,Sudoku::q);
 	Refill(light,Sudoku::q);
 
+	
 	for( i = 0 ;i < 81 ;i++ ){
 		record_map[i] = Sudoku::q[i];
 		for( j = 0 ; j < 9 ; j++ ) record_light[i][j] = light[i][j];
 	}
 	
-	TraceBack(0,record_light,record_map);
+	TraceBack(record_light,record_map);
+	Ans = CheckSolution(record_light);
+	
 
-	if(Ans == 0 || Ans == 2){
+	if(Ans == 2){
 		cout << "2" << endl;
-//		cout << "Ans = " << Ans << endl;
-//		printOut(true);
 		return;
 	}
-	else{
+	else if(Ans == 0){
+		cout << "0" << endl;
+	}
+	else if(Ans == 1){
 		cout << "1" << endl;
-//		cout << "Ans = " << Ans << endl;
 		printOut(true,record_map);
 		return;
 	}
+	else return;
 }
-
+int Sudoku::CheckSolution(bool l[81][9]){
+	
+	CheckSmlMatrix(l,q);
+	CheckRow(l,q);
+	CheckCol(l,q);
+	
+	if(ExsistZero())	return 0;
+	else if( CheckMap())	return 1;
+	else if(TwoLight(l))	return 2;
+	else 			return 3;
+}
+bool Sudoku::ExsistZero(){
+	int i;
+	for(i=0;i<81;i++){
+		if(q[i] == 0)return true;
+	}
+	return false;
+}
+bool TwoLight(bool l[81][9]){
+	int i,j;
+	int cnt;
+	for(i=0;i<81;i++){
+		cnt = 0;
+		for(j=0;j<9;j++){
+			if(l[i][j] == true) cnt++;
+		}
+		if( cnt > 1 ) return true;
+	}
+	return false;
+}
 void Initialize(bool lgt[81][9]){
 	int i,j;
 	for(i=0;i<81;i++){
@@ -79,100 +113,47 @@ void Sudoku::TurnOffOrigin(bool lgt[81][9], int a[81]){
 		}
 		else continue;
 	}
-
 }
-void Sudoku::TraceBack(int n,bool l[81][9],int a[81]){
-	int i,j,k;
-	int cnt;
-	int tmp[81];
-	bool r[81][9];
-	
-	if( CheckMap(a) ){
-		if(!TwoSolution(l)){
-			for(i=0;i<81;i++){
-				q[i] = a[i];
-			}
-			Ans = 1;;
-			return;
-		}
-		if(TwoSolution(l)){
-			Ans = 2;
-			return;
-		}
-	}	
-	if( NoLight(l)){
-		
-		cout << "test2\n";
-
-		for(i=0;i<81;i++){
-		a[i] = q[i];
-		for(j=0;j<9;j++){
-			l[i][j] = light[i][j];
-		}
-		}
-		for(i=0;i<9;i++){
-			if(l[n-1][i]==true){
-				l[n-1][i]=false;
-				break;
-			}
-		}
-
-		TraceBack(0,l,a);
-	}
-	if( n < 0 ) return;
-	if(CheckRule(a)){
-
-		for( i = 0 ; i< 9 ;i++ ){
-			if( l[n][i] == true ){
-	
-				a[n] = i+1;
-				for(j=0;j<81;j++){
-				for(k=0;k<9;k++){
-					r[j][k] = l[j][k];
-				}
-				}
-	
-				TurnOffOrigin(l,a);
-				CheckSmlMatrix(l,a);
-				CheckRow(l,a);
-				CheckCol(l,a);
-				OnlyRemain(l,a);
-				Refill(l,a);
-			
-				if(NoLight(l)){
-	
-					cout << "No Light" << endl;
-	
-					for(j=0;j<9;j++){
-						l[n][j] = r[n][j];
-					}
-					for(j=0;j<9;j++){
-						if(l[n][i]==true){ 
-							l[n][i] = false;
-							break;
-						}
-					}
-				TraceBack(n,l,a);
-				}
-
-		//		printLight(l);
-			
-				TraceBack(n+1,l,a);
-			}
-		}
-	}
-}
-bool TwoSolution(bool l[81][9]){
+void Sudoku::TraceBack(bool l[81][9],int a[81]){
 	int i,j;
-	int cnt;
-	for(i=0;i<81;i++){
-		cnt = 0;
-		for(j=0;j<9;j++){
-			if(l[i][j] == true) cnt++;
+	int tmp[81];
+	int valid = getValid(-1);
+	int POS[81];
+	int lastPOS = 0;
+	do{
+		
+		cout << endl;
+		
+		a[valid]++;
+
+		if(a[valid] > 9){
+			a[valid] = 0;
+			if(lastPOS < 0)	valid = -1;
+			else{
+				valid = POS[--lastPOS];
+			}
+		}	 
+		else{
+			if(MaybeMat(l[valid],a[valid]) && CheckRule(a)){
+				POS[lastPOS++] = valid;
+				valid = getValid(valid);
+			}
 		}
-		if(cnt > 1) return true;
-	}
-	return false;
+	}while( valid >= 0 && valid < 81) ;
+	
+	for(i=0;i<81;i++) q[i] = a[i];
+	
+}
+int Sudoku::getValid(int blank){
+	do{
+		blank++;
+	}while(blank < 81 && q[blank]>0);
+	return blank;
+}
+bool MaybeMat(bool *l,int a){
+	int i;
+	if(l[a-1]==true)	return true;
+	else return false;
 }
 bool NoLight(bool lgt[81][9]){
 	int i,j;
@@ -461,15 +442,19 @@ void Sudoku::OnlyRemain(bool lgt[81][9],int a[81]){
 }
 
 
-bool Sudoku::CheckMap(int map[81]){
+bool Sudoku::CheckMap(){
 	int i,j,k;
 
 	int num = 0;
 
+	for(i=0;i<81;i++){
+		if(q[i] == 0)	return false;
+	}
+
 	for(i=0;i<9;i++){
 		num = 0;
 		for(j=0;j<9;j++){
-			if(map[i*9+j]>0)num = num + map[i*9+j];
+			if(q[i*9+j]>0)	num = num + q[i*9+j];
 		}
 		if(num != 45) return false;	
 	}
@@ -477,7 +462,7 @@ bool Sudoku::CheckMap(int map[81]){
 	for(i=0;i<9;i++){
 		num = 0;
 		for(j=0;j<9;j++){
-			if(map[i*9+j]>0)num = num + map[j*9+i];
+			if(q[i*9+j]>0)num = num + q[j*9+i];
 		}
 		if(num != 45) return false;	
 	}
@@ -492,21 +477,21 @@ bool Sudoku::CheckMap(int map[81]){
 		if( n>=0 && n<3 ){
 			for( i=0 ; i<3 ; i++){
 			for(j=n*3 ; j<n*3+3 ; j++){
-				if(map[i*9+j]>0)num = num + map[i*9+j];
+				if(q[i*9+j]>0)num = num + q[i*9+j];
 			}
 			}
 		}
 		else if( n>=3 && n<6 ){
 			for( i=3 ; i<6 ; i++){
 			for( j=(n-3)*3 ; j<(n-3)*3+3 ; j++){
-				if(map[i*9+j]>0)num = num + map[i*9+j];
+				if(q[i*9+j]>0)num = num + q[i*9+j];
 			}
 			}
 		}
 		else{
 			for( i=6 ; i<9 ; i++){
 			for( j =(n-6)*3 ; j<(n-6)*3+3 ; j++){
-				if(map[i*9+j]>0)num = num + map[i*9+j];
+				if(q[i*9+j]>0)num = num + q[i*9+j];
 			}
 			}
 			
@@ -522,8 +507,8 @@ bool CheckRule(int map[81]){
 	int i,j,k;
 	int cnt;
 	for(k=0;k<9;k++){
-		for(i=0;i<9;i++){
 		cnt = 0;
+		for(i=0;i<9;i++){
 		for(j=0;j<9;j++){
 			if(map[i*9+j] == k+1) cnt++;
 		}
@@ -531,8 +516,8 @@ bool CheckRule(int map[81]){
 		}
 	}
 	for(k=0;k<9;k++){
-		for(i=0;i<9;i++){
 		cnt = 0;
+		for(i=0;i<9;i++){
 		for(j=0;j<9;j++){
 			if(map[j*9+i] == k+1) cnt++;
 		}
@@ -542,9 +527,9 @@ bool CheckRule(int map[81]){
 	int n = 0;
 	while( n<9 ){
 		if( n>=0 && n<3 ){
-			for(k=1;k<10;k++){	
-				for( i=0 ; i<3 ; i++){
+			for(k=1;k<10;k++){
 				cnt = 0;
+				for( i=0 ; i<3 ; i++){
 				for(j=n*3 ; j<n*3+3 ; j++){
 						if(map[i*9+j]==k) cnt++;
 				}
@@ -554,8 +539,8 @@ bool CheckRule(int map[81]){
 		}
 		else if( n>=3 && n<6 ){
 			for(k=1;k<10;k++){
-				for( i=3 ; i<6 ; i++){
 				cnt = 0;
+				for( i=3 ; i<6 ; i++){
 				for( j=(n-3)*3 ; j<(n-3)*3+3 ; j++){
 						if(map[i*9+j]==k) cnt++;
 				}
@@ -565,8 +550,8 @@ bool CheckRule(int map[81]){
 		}
 		else{
 			for(k=1;k<10;k++){
-				for( i=6 ; i<9 ; i++){
 				cnt = 0;
+				for( i=6 ; i<9 ; i++){
 				for( j =(n-6)*3 ; j<(n-6)*3+3 ; j++){
 						if(map[i*9+j]==k) cnt++;
 				}
@@ -581,10 +566,10 @@ bool CheckRule(int map[81]){
 	return true;
 }
 
-void Sudoku::printOut(bool Ans,int m[81]){
+void Sudoku::printOut(bool Answ,int m[81]){
 	int i,j;
 	
-	if(!Ans){
+	if(!Answ){
 		for(i=0;i<81;i++){
 			if(i%9==0) cout << endl;
 			cout << m[i] << " ";
