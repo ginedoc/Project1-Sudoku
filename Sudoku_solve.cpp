@@ -156,7 +156,7 @@ void Sudoku::TraceBack(bool l[81][9],int a[81]){
 	}
 	
 	
-	for(i=0;i<9;i++){
+	for(i=0;i<81;i++){
 		if(a[i]==0) a[i] = 10;
 	}
 
@@ -167,8 +167,8 @@ void Sudoku::TraceBack(bool l[81][9],int a[81]){
 
 		if(a[valid] < 1){
 			a[valid] = 10;
-			if(lastPOS > 80) valid = 81;
-			else valid = POS[++lastPOS];
+			if(lastPOS > 80) {valid = 81;}
+			else {valid = POS[++lastPOS];}
 		}
 		else{
 			if(MaybeMat(l[valid],a[valid]) && CheckRule(a)){
@@ -179,7 +179,6 @@ void Sudoku::TraceBack(bool l[81][9],int a[81]){
 	}while( valid >=0 && valid < 81);
 
 	for(i=0;i<81;i++) A[i] = a[i];
-
 }
 int Sudoku::getValid(int blank){
 	do{
@@ -190,7 +189,7 @@ int Sudoku::getValid(int blank){
 int getBackwardValid(int blank,int a[81]){
 	do{
 		blank--;
-	}while(blank >= 0 && a[blank] < 9);
+	}while(blank > -1 && a[blank] < 10);
 	return blank;
 }
 bool MaybeMat(bool *l,int a){
