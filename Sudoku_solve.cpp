@@ -507,8 +507,8 @@ bool CheckRule(int map[81]){
 	int i,j,k;
 	int cnt;
 	for(k=0;k<9;k++){
-		cnt = 0;
 		for(i=0;i<9;i++){
+		cnt = 0;
 		for(j=0;j<9;j++){
 			if(map[i*9+j] == k+1) cnt++;
 		}
@@ -516,8 +516,8 @@ bool CheckRule(int map[81]){
 		}
 	}
 	for(k=0;k<9;k++){
-		cnt = 0;
 		for(i=0;i<9;i++){
+		cnt = 0;
 		for(j=0;j<9;j++){
 			if(map[j*9+i] == k+1) cnt++;
 		}
