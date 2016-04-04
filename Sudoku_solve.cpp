@@ -10,6 +10,7 @@ using namespace std;
    element will only have one light be up ( other will be turned off.)*/
 bool light[81][9];
 int lightbulb;	//for light[81][9]
+int A[81];
 int Ans = 0 ;
 
 void Initialize(bool lgt[81][9]);
@@ -18,6 +19,8 @@ void printLight(bool lgt[81][9]);
 bool CheckRule(int*);
 bool MaybeMat(bool *l,int a);
 bool TwoLight(bool l[81][9]);
+bool Equal(int a[81],int b[81]);
+int getBackwardValid(int ,int *);
 
 void Sudoku::solve(){
 	
@@ -60,13 +63,10 @@ void Sudoku::solve(){
 }
 int Sudoku::CheckSolution(bool l[81][9]){
 	
-	CheckSmlMatrix(l,q);
-	CheckRow(l,q);
-	CheckCol(l,q);
 	
 	if(ExsistZero())	return 0;
-	else if( CheckMap())	return 1;
-	else if(TwoLight(l))	return 2;
+	else if( Equal(q,A) && CheckMap())	return 1;
+	else if( !Equal(q,A))	return 2;
 	else 			return 3;
 }
 bool Sudoku::ExsistZero(){
@@ -75,6 +75,16 @@ bool Sudoku::ExsistZero(){
 		if(q[i] == 0)return true;
 	}
 	return false;
+}
+bool Equal(int a[81],int b[81]){
+	int i;
+	int cnt = 0;
+	for(i=0;i<81;i++){
+		if(a[i] == b[i]) cnt++;
+	}
+	if( cnt == 81) return true;
+	return false;
+
 }
 bool TwoLight(bool l[81][9]){
 	int i,j;
@@ -121,9 +131,6 @@ void Sudoku::TraceBack(bool l[81][9],int a[81]){
 	int POS[81];
 	int lastPOS = 0;
 	do{
-		
-		cout << endl;
-		
 		a[valid]++;
 
 		if(a[valid] > 9){
@@ -137,17 +144,53 @@ void Sudoku::TraceBack(bool l[81][9],int a[81]){
 			if(MaybeMat(l[valid],a[valid]) && CheckRule(a)){
 				POS[lastPOS++] = valid;
 				valid = getValid(valid);
+				
 			}
 		}
 	}while( valid >= 0 && valid < 81) ;
 	
-	for(i=0;i<81;i++) q[i] = a[i];
+	for(i=0;i<81;i++){
+		tmp[i] = q[i];
+		q[i] = a[i];
+		a[i] = tmp[i];
+	}
 	
+	
+	for(i=0;i<9;i++){
+		if(a[i]==0) a[i] = 10;
+	}
+
+	valid = getBackwardValid(81,a);
+	lastPOS = 80;
+	do{
+		a[valid]--;
+
+		if(a[valid] < 1){
+			a[valid] = 10;
+			if(lastPOS > 80) valid = 81;
+			else valid = POS[++lastPOS];
+		}
+		else{
+			if(MaybeMat(l[valid],a[valid]) && CheckRule(a)){
+				POS[lastPOS--] = valid;
+				valid = getBackwardValid(valid,a);
+			}
+		}
+	}while( valid >=0 && valid < 81);
+
+	for(i=0;i<81;i++) A[i] = a[i];
+
 }
 int Sudoku::getValid(int blank){
 	do{
 		blank++;
 	}while(blank < 81 && q[blank]>0);
+	return blank;
+}
+int getBackwardValid(int blank,int a[81]){
+	do{
+		blank--;
+	}while(blank >= 0 && a[blank] < 9);
 	return blank;
 }
 bool MaybeMat(bool *l,int a){
