@@ -21,7 +21,7 @@ bool MaybeMat(bool *l,int a);
 bool TwoLight(bool l[81][9]);
 bool Equal(int a[81],int b[81]);
 int getBackwardValid(int ,int *);
-void CheckZeroAnswer(bool l[81][9],int a[81]);
+bool CheckZeroAnswer(bool l[81][9],int a[81]);
 
 void Sudoku::solve(){
 	
@@ -29,7 +29,7 @@ void Sudoku::solve(){
 	int record_map[81];
 	bool record_light[81][9];
 	
-	while(true){
+	while(!Equal(A,q)){
 		//solving skill
 		Initialize(light);
 		TurnOffOrigin(light,Sudoku::q);
@@ -38,16 +38,12 @@ void Sudoku::solve(){
 		CheckCol(light,Sudoku::q);
 		OnlyRemain(light,Sudoku::q);
 		Refill(light,Sudoku::q);
-		if(!Equal(A,q)){
-			for(i=0;i<81;i++) A[i] = q[i];
-		}
-		if(Equal(A,q))	break;
+		for(i=0;i<81;i++) A[i] = q[i];
 	}
 
 	
 	for( i = 0 ;i < 81 ;i++ ){
 		record_map[i] = Sudoku::q[i];
-		A[i] = 0;
 		for( j = 0 ; j < 9 ; j++ ) record_light[i][j] = light[i][j];
 	}
 	
@@ -77,7 +73,8 @@ int Sudoku::CheckSolution(bool l[81][9]){
 		else if( !Equal(q,A))	return 2;
 		else 			return 3;
 	}
-	if(Ans = 0) return 0;
+	if(Ans == 0) return 0;
+	if(Ans == 1) return 1;
 	if(Ans == 2 ) return 2;
 }
 bool Sudoku::ExsistZero(){
@@ -137,11 +134,17 @@ void Sudoku::TurnOffOrigin(bool lgt[81][9], int a[81]){
 }
 void Sudoku::TraceBack(bool l[81][9],int a[81]){
 	int i,j;
+	int cnt = 0;
 	int tmp[81];
 	int valid = getValid(-1);
 	int POS[81];
 	int lastPOS = 0;
-	CheckZeroAnswer(l,a);
+	if(CheckZeroAnswer(l,a))	return;
+	for(i=0;i<81;i++){
+		if(a[i] != 0)	cnt++;
+	}
+	if(cnt == 81) Ans=1;
+
 	if(Ans == -1){
 		do{
 			a[valid]++;
@@ -161,43 +164,48 @@ void Sudoku::TraceBack(bool l[81][9],int a[81]){
 				}
 			}
 		}while( valid >= 0 && valid < 81) ;
-		
+
 		for(i=0;i<81;i++){
 			tmp[i] = q[i];
 			q[i] = a[i];
 			a[i] = tmp[i];
 		}
 		
-		
-		for(i=0;i<81;i++){
-			if(a[i]==0) a[i] = 10;
+		if(ExsistZero()){
+			Ans = 0;
+			return;
 		}
-	
-		valid = getBackwardValid(-1,a);
-		lastPOS = 0;
-		do{
-			if(valid > 80)break;
-			a[valid]--;
-	
-			if(a[valid] < 1){
-				a[valid] = 10;
-				if(lastPOS < 0) valid = -1;
-				else {
-					valid = POS[--lastPOS];
-				}
+		else{
+			for(i=0;i<81;i++){
+				if(a[i]==0) a[i] = 10;
 			}
-			else{
-				if(MaybeMat(l[valid],a[valid]) && CheckRule(a)){
-					POS[lastPOS++] = valid;
-					valid = getBackwardValid(valid,a);
-				}
-			}
-		}while( valid >=0 && valid < 81);
 	
-		for(i=0;i<81;i++) A[i] = a[i];
-	}		
+			valid = getBackwardValid(-1,a);
+			lastPOS = 0;
+			do{
+				if(valid > 80)break;
+				a[valid]--;
+		
+				if(a[valid] < 1){
+					a[valid] = 10;
+					if(lastPOS < 0) valid = -1;
+					else {
+						valid = POS[--lastPOS];
+					}
+				}
+				else{
+					if(MaybeMat(l[valid],a[valid]) && CheckRule(a)){
+						POS[lastPOS++] = valid;
+						valid = getBackwardValid(valid,a);
+					}
+				}
+			}while( valid >=0 && valid < 81);
+		
+			for(i=0;i<81;i++) A[i] = a[i];
+		}		
+	}
 }
-void CheckZeroAnswer(bool l[81][9],int a[81]){
+bool CheckZeroAnswer(bool l[81][9],int a[81]){
 	int i,j,k;
 	int cnt = 0;
 	int cnt1 = 0;
@@ -213,11 +221,25 @@ void CheckZeroAnswer(bool l[81][9],int a[81]){
 			}
 			if( t == 0 ){
 				Ans = 0;
-				return;
+				return true;
+			}
+		}
+		for(i=0;i<9;i++){
+			for(j=0;j<9;j++){
+				cnt = 0;
+				cnt1 = 0;
+				for(k=0;k<9;k++){
+					if(a[j*9+k] == i+1) cnt++;
+					if(a[k*9+j] == i+1) cnt1++;
+				}
+				if(cnt > 1 || cnt1 > 1){
+					Ans = 0;
+					return true;
+				}
 			}
 		}
 		Ans = 2;
-		return;
+		return true;
 	}
 	for(i=0;i<9;i++){
 		for(j=0;j<9;j++){
@@ -229,10 +251,11 @@ void CheckZeroAnswer(bool l[81][9],int a[81]){
 			}
 			if(cnt > 1 || cnt1 > 1){
 				Ans = 0;
-				return;
+				return true;
 			}
 		}
 	}
+	return false;
 }
 int Sudoku::getValid(int blank){
 	do{
