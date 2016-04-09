@@ -8,16 +8,15 @@ using namespace std;
 
 using namespace std;
 
-int i,j;
-int map[81];
-
 Sudoku::Sudoku(){
+	int i;
 	for(i=0;i<81;i++){
 		Sudoku::q[i]=0;
 	}
 }
 
 void Sudoku::giveQuestion(){
+	int i,j;
 	ofstream output;
 /*  	int matrix[9][9]={{5,3,0,0,7,0,0,0,0},
 			  {6,0,0,1,9,5,0,0,0},
@@ -57,7 +56,8 @@ void Sudoku::giveQuestion(){
 
 //read sudoku in
 void Sudoku::readIn(){
-	
+	int i;
+
 	i=0;
 	
 	while( i < 81 ){
@@ -69,6 +69,7 @@ void Sudoku::readIn(){
 }
 
 void Sudoku::changeNum(int a,int b){
+	int i,j;
 
 	//check & change
 	
@@ -77,8 +78,8 @@ void Sudoku::changeNum(int a,int b){
 	}
 	else{
 		for(i=0;i<81;i++){
-			if	(map[i] == a)	map[i] = b;
-			else if	(map[i] == b)	map[i] = a;
+			if	(q[i] == a)	q[i] = b;
+			else if	(q[i] == b)	q[i] = a;
 			else continue;
 		}
 	}
@@ -86,7 +87,7 @@ void Sudoku::changeNum(int a,int b){
 }
 
 void Sudoku::changeRow(int a,int b){
-	
+	int i;
 	int tmp;
 
 	//check & change [ a row <-> b row ]
@@ -97,15 +98,15 @@ void Sudoku::changeRow(int a,int b){
 	}
 	else{
 		for( i=0;i<27;i++ ){
-			tmp = map[a * 27 + i];
-			map[a * 27 + i] = map[b * 27 + i];
-			map[b * 27 + i] = tmp;
+			tmp = q[a * 27 + i];
+			q[a * 27 + i] = q[b * 27 + i];
+			q[b * 27 + i] = tmp;
 		}
 	}
 }
 
 void Sudoku::changeCol(int a,int b){
-	
+	int i,j;
 	int tmp;
 	
 	//check & change [ a column <-> b column ]
@@ -116,32 +117,34 @@ void Sudoku::changeCol(int a,int b){
 	}
 	else{
 		for( i=0;i<27;i++ ){
-			tmp = map[ i%3 + a*3 + (i/3)*9 ];
-			map[ i%3 + a*3 + (i/3)*9 ] = map[ i%3 + b*3 + (i/3)*9 ];
-			map[ i%3 + b*3 + (i/3)*9 ] = tmp;
+			tmp = q[ i%3 + a*3 + (i/3)*9 ];
+			q[ i%3 + a*3 + (i/3)*9 ] = q[ i%3 + b*3 + (i/3)*9 ];
+			q[ i%3 + b*3 + (i/3)*9 ] = tmp;
 		}	 
 	}
 	
 }
 
 void Sudoku::rotate(int n){
-
+	int i,j;
+	
 	int tmp[81];
 
 	while(n>0){
 		for( i=0;i<9;i++ ){
 			for( j=0;j<9;j++ ){
-				tmp[j*9+(8-i)] = map[i*9+j];
+				tmp[j*9+(8-i)] = q[i*9+j];
 			}		
 		}
 		for(i=0;i<81;i++){
-			map[i] = tmp[i];
+			q[i] = tmp[i];
 		}
 		n--;
 	}
 }
 void Sudoku::flip(int n){
-	
+	int i,j;
+
 	int tmp[81];
 
 	if( n<0 || n>1){
@@ -150,10 +153,10 @@ void Sudoku::flip(int n){
 	}
 	else{
 		//vertical
-		if( n=1 ){
+		if( n==0 ){
 			for( i=0;i<9;i++){
 				for( j=0;j<9;j++){
-					tmp[i*9+j] = map[(8-i)*9+j];
+					tmp[i*9+j] = q[(8-i)*9+j];
 				}
 			}
 		}
@@ -161,12 +164,12 @@ void Sudoku::flip(int n){
 		else{
 			for( i=0;i<9;i++){
 				for(j=0;j<9;j++){
-					tmp[i*9+j] = map[i*9+(8-j)];
+					tmp[i*9+j] = q[i*9+(8-j)];
 				}
 			}
 		}
 		for( i=0;i<81;i++ ){
-			map[i] = tmp[i];
+			q[i] = tmp[i];
 		}
 	}
 }
@@ -174,7 +177,7 @@ void Sudoku::flip(int n){
 void Sudoku::transform(){
 	readIn();
 	change();
-	printOut(false,map);
+	printOut(false,q);
 }
 
 void Sudoku::change(){
