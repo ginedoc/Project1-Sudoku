@@ -17,7 +17,7 @@ class Sudoku{
 	private:
 
 		int q[81];
-//		int map[81];
+		int map[81];
 		int RowRecord[2];
 		int ColRecord[2];
 
